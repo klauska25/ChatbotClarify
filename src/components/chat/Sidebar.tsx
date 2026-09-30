@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { CloseIcon, PlusIcon } from "@/components/icons";
 import { searchConversations } from "@/lib/search-conversations";
 import type { Conversation } from "@/lib/types";
+import { AccountFooter } from "./AccountFooter";
 import { ConversationListItem } from "./ConversationListItem";
 import { SearchField } from "./SearchField";
 
@@ -106,6 +107,8 @@ export function Sidebar({
             />
           ))}
         </ul>
+
+        <AccountFooter />
       </aside>
     </>
   );
