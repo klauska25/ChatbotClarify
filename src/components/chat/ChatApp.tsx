@@ -6,9 +6,9 @@ import { sampleConversations } from "@/lib/conversas-exemplo";
 import { createId } from "@/lib/ids";
 import type { Conversation, Message } from "@/lib/types";
 import { AmbientGlow } from "./AmbientGlow";
-import { BackgroundTopography } from "./BackgroundTopography";
 import { ChatHeader } from "./ChatHeader";
 import { EmptyState } from "./EmptyState";
+import { LiveTopography } from "./LiveTopography";
 import { MessageInput } from "./MessageInput";
 import { MessageList } from "./MessageList";
 import { Sidebar } from "./Sidebar";
@@ -159,8 +159,8 @@ export function ChatApp() {
     // mas na frente da cor de fundo da página.
     <div className="relative isolate flex h-dvh overflow-hidden bg-surface md:gap-3 md:p-3">
       <AmbientGlow />
-      {/* Na conversa vazia as linhas se movem devagar; com mensagens, ficam paradas. */}
-      <BackgroundTopography
+      {/* Na conversa vazia as linhas ondulam devagar; com mensagens, ficam paradas. */}
+      <LiveTopography
         conversationId={activeConversation.id}
         isMoving={activeConversation.messages.length === 0}
       />
