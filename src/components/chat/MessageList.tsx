@@ -7,10 +7,12 @@ import { TypingIndicator } from "./TypingIndicator";
 
 interface MessageListProps {
   messages: Message[];
+  contactName: string;
   isReplying: boolean;
+  showTime: boolean;
 }
 
-export function MessageList({ messages, isReplying }: MessageListProps) {
+export function MessageList({ messages, contactName, isReplying, showTime }: MessageListProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Mantém a mensagem mais recente visível sempre que algo novo aparece.
@@ -21,9 +23,14 @@ export function MessageList({ messages, isReplying }: MessageListProps) {
 
   return (
     <div ref={containerRef} className="flex-1 overflow-y-auto" role="log">
-      <div className="mx-auto flex max-w-3xl flex-col gap-3 px-4 py-6 md:px-6">
+      <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-6 md:px-6">
         {messages.map((message) => (
-          <MessageBubble key={message.id} message={message} />
+          <MessageBubble
+            key={message.id}
+            message={message}
+            contactName={contactName}
+            showTime={showTime}
+          />
         ))}
         {isReplying && <TypingIndicator />}
       </div>

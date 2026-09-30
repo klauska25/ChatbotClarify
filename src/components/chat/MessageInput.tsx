@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
+import { ArrowRightIcon } from "@/components/icons";
 
 // Altura máxima do campo antes de ele ganhar barra de rolagem.
 const MAX_TEXTAREA_HEIGHT = 160;
@@ -44,9 +45,9 @@ export function MessageInput({ onSend }: MessageInputProps) {
         event.preventDefault();
         submit();
       }}
-      className="shrink-0 border-t border-neutral-200 bg-white px-4 py-3 md:px-6 md:py-4"
+      className="shrink-0 border-t border-line bg-panel px-4 py-4"
     >
-      <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-neutral-300 bg-white p-1.5 transition-colors focus-within:border-brand-dark focus-within:ring-2 focus-within:ring-brand/50">
+      <div className="mx-auto flex max-w-[770px] items-end gap-3">
         <label htmlFor="message-input" className="sr-only">
           Mensagem
         </label>
@@ -58,17 +59,18 @@ export function MessageInput({ onSend }: MessageInputProps) {
           onChange={(event) => setValue(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Escreva sua mensagem"
-          className="flex-1 resize-none bg-transparent px-2.5 py-2 text-base leading-6 text-ink outline-none placeholder:text-neutral-400"
+          className="min-h-11 flex-1 resize-none rounded-md border border-neutral-600 bg-raised px-4 py-2.5 text-base leading-6 text-white outline-none transition-colors placeholder:text-neutral-400 focus:border-brand"
         />
         <button
           type="submit"
           disabled={!canSend}
-          className="rounded-xl bg-ink px-4 py-2 text-sm font-semibold text-brand transition-colors hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-dark disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
+          className="flex h-11 shrink-0 items-center gap-2 rounded-full bg-brand px-6 text-sm font-bold text-ink transition-colors hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:bg-brand-dark disabled:text-ink/80"
         >
           Enviar
+          <ArrowRightIcon />
         </button>
       </div>
-      <p className="mx-auto mt-2 hidden max-w-3xl px-1 text-xs text-neutral-400 md:block">
+      <p className="mx-auto mt-1.5 hidden max-w-[770px] px-1 text-xs text-neutral-400 md:block">
         Enter envia. Shift+Enter quebra a linha.
       </p>
     </form>

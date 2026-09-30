@@ -29,12 +29,10 @@ export function PlusIcon({ className = "size-4" }: IconProps) {
   );
 }
 
-// Relógio usado como marca do TimeTrack.
-export function ClockIcon({ className = "size-4" }: IconProps) {
+export function ArrowRightIcon({ className = "size-4" }: IconProps) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="8.5" />
-      <path d="M12 7.5V12l3 2" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 12h14M13 6l6 6-6 6" />
     </svg>
   );
 }

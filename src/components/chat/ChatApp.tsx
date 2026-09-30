@@ -142,7 +142,7 @@ export function ChatApp() {
   const showEmptyState = activeConversation.messages.length === 0 && !isReplying;
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-white">
+    <div className="flex h-dvh overflow-hidden bg-surface">
       <Sidebar
         conversations={sortedConversations}
         activeConversationId={activeConversation.id}
@@ -156,8 +156,6 @@ export function ChatApp() {
       <main className="flex min-w-0 flex-1 flex-col">
         <ChatHeader
           title={activeConversation.title}
-          contactName={activeConversation.contactName}
-          contactEmail={activeConversation.contactEmail}
           category={activeConversation.category}
           isMenuOpen={isSidebarOpen}
           onOpenMenu={() => setIsSidebarOpen(true)}
@@ -170,7 +168,9 @@ export function ChatApp() {
           <MessageList
             key={activeConversation.id}
             messages={activeConversation.messages}
+            contactName={activeConversation.contactName}
             isReplying={isReplying}
+            showTime={now !== null}
           />
         )}
 
