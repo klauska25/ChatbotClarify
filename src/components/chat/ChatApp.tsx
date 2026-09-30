@@ -165,7 +165,7 @@ export function ChatApp() {
         {/* isolate cria uma camada própria: o desenho de fundo (-z-10) fica atrás das
             mensagens, mas na frente da cor de fundo da página. */}
         <div className="relative isolate flex min-h-0 flex-1 flex-col overflow-hidden">
-          <BackgroundTopography />
+          <BackgroundTopography conversationId={activeConversation.id} />
 
           {showEmptyState ? (
             <EmptyState onPickSuggestion={sendMessage} />

@@ -10,6 +10,17 @@
   --color-brand-hover: #bef264;
   --color-brand-dark: #4d7c0f;
   --color-ink: #0a0a0a;
+
+  /* Entrada suave do desenho de fundo ao trocar de conversa. */
+  --animate-fade-in: fade-in 450ms ease-out;
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 }
 
 /* Cores que mudam com o tema. Os valores ficam nas variáveis abaixo. */

@@ -1,4 +1,5 @@
-// Gera public/topography.svg: linhas de relevo (curvas de nível) usadas no fundo da conversa.
+// Gera public/topography/1.svg, 2.svg, ...: linhas de relevo (curvas de nível) usadas no
+// fundo da conversa. Cada arquivo é um desenho diferente, e cada conversa usa um deles.
 //
 // Como funciona:
 // 1. Cria um "terreno" suave com ruído de Perlin em várias escalas.
@@ -6,19 +7,21 @@
 // 3. Simplifica as linhas e as desenha como curvas suaves no SVG.
 //
 // Para gerar de novo: node scripts/generate-topography.mjs
-// Troque SEED para um desenho diferente, LEVELS para mais ou menos linhas.
+// Cada número em SEEDS vira um desenho. Se mudar a quantidade de SEEDS, atualize
+// TOPOGRAPHY_VARIANTS em src/lib/topography.ts. LEVELS controla quantas linhas aparecem.
 
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 
 const WIDTH = 1600;
 const HEIGHT = 1000;
 const CELL = 8; // resolução da grade em pixels; menor = linhas mais precisas e arquivo maior
 const LEVELS = 55; // quantidade de alturas cortadas; mais níveis = mais linhas
 const BASE_FREQUENCY = 1 / 600;
-// Inclinação suave na diagonal: garante linhas em toda a área, sem platôs vazios.
+// Inclinação suave: garante linhas em toda a área, sem platôs vazios.
+// A direção muda em cada desenho, para as linhas fluírem para lados diferentes.
 const SLOPE = 0.0008;
 const OCTAVES = 2;
-const SEED = 17;
+const SEEDS = [17, 3, 42, 88, 131, 256, 512, 777];
 const SIMPLIFY_TOLERANCE = 0.9;
 const STROKE_WIDTH = 1.1;
 
@@ -70,42 +73,53 @@ function createPerlin(random) {
   };
 }
 
-const perlin = createPerlin(createRandom(SEED));
+// Cria o terreno de um desenho a partir da semente.
+function createTerrain(seed) {
+  const random = createRandom(seed);
+  const perlin = createPerlin(random);
+  const slopeAngle = random() * Math.PI * 2;
+  const slopeX = Math.cos(slopeAngle) * Math.SQRT2 * SLOPE;
+  const slopeY = Math.sin(slopeAngle) * Math.SQRT2 * SLOPE;
 
-function fbm(x, y) {
-  let value = 0;
-  let amplitude = 1;
-  let frequency = BASE_FREQUENCY;
-  for (let octave = 0; octave < OCTAVES; octave++) {
-    value += amplitude * perlin(x * frequency, y * frequency);
-    amplitude *= 0.3;
-    frequency *= 2.1;
+  function fbm(x, y) {
+    let value = 0;
+    let amplitude = 1;
+    let frequency = BASE_FREQUENCY;
+    for (let octave = 0; octave < OCTAVES; octave++) {
+      value += amplitude * perlin(x * frequency, y * frequency);
+      amplitude *= 0.3;
+      frequency *= 2.1;
+    }
+    return value;
   }
-  return value;
+
+  // Distorce as coordenadas com o próprio ruído, para as curvas ficarem mais orgânicas.
+  return (x, y) => {
+    const warpX = 60 * fbm(x + 311, y + 97);
+    const warpY = 60 * fbm(x - 523, y + 431);
+    return fbm(x + warpX, y + warpY) + slopeX * x + slopeY * y;
+  };
 }
 
-// Distorce as coordenadas com o próprio ruído, para as curvas ficarem mais orgânicas.
-function terrain(x, y) {
-  const warpX = 60 * fbm(x + 311, y + 97);
-  const warpY = 60 * fbm(x - 523, y + 431);
-  return fbm(x + warpX, y + warpY) + SLOPE * (x + y);
-}
-
-// Alturas nos cantos de cada célula da grade.
 const cols = Math.ceil(WIDTH / CELL);
 const rows = Math.ceil(HEIGHT / CELL);
-const heights = [];
-for (let j = 0; j <= rows; j++) {
-  const row = [];
-  for (let i = 0; i <= cols; i++) {
-    row.push(terrain(i * CELL, j * CELL));
+
+// Alturas nos cantos de cada célula da grade.
+function computeHeights(terrain) {
+  const heights = [];
+  for (let j = 0; j <= rows; j++) {
+    const row = [];
+    for (let i = 0; i <= cols; i++) {
+      row.push(terrain(i * CELL, j * CELL));
+    }
+    heights.push(row);
   }
-  heights.push(row);
+  return heights;
 }
 
 // Marching squares: para cada altura, encontra os segmentos onde o terreno cruza aquele valor.
 // Cada ponto é identificado pela aresta da grade onde está, para ligar os segmentos sem erro.
-function contourSegments(level) {
+function contourSegments(heights, level) {
   const segments = [];
   const point = (edgeKey, x, y) => ({ key: edgeKey, x, y });
   const interpolate = (a, b) => (level - a) / (b - a);
@@ -239,27 +253,37 @@ function toPath(points, closed) {
   return closed ? `${d}Z` : d;
 }
 
-// Alturas de corte em intervalos iguais entre a menor e a maior altura do terreno.
-const allHeights = heights.flat();
-const minHeight = Math.min(...allHeights);
-const maxHeight = Math.max(...allHeights);
-const levelValues = Array.from(
-  { length: LEVELS },
-  (_, index) => minHeight + ((maxHeight - minHeight) * (index + 1)) / (LEVELS + 1),
-);
+function buildSvg(seed) {
+  const heights = computeHeights(createTerrain(seed));
 
-const paths = [];
-for (const value of levelValues) {
-  for (const line of joinSegments(contourSegments(value))) {
-    const simplified = simplify(line.points, SIMPLIFY_TOLERANCE);
-    if (simplified.length < 3 && !line.closed) continue;
-    const path = toPath(simplified, line.closed);
-    if (path) paths.push(path);
+  // Alturas de corte em intervalos iguais entre a menor e a maior altura do terreno.
+  const allHeights = heights.flat();
+  const minHeight = Math.min(...allHeights);
+  const maxHeight = Math.max(...allHeights);
+  const levelValues = Array.from(
+    { length: LEVELS },
+    (_, index) => minHeight + ((maxHeight - minHeight) * (index + 1)) / (LEVELS + 1),
+  );
+
+  const paths = [];
+  for (const value of levelValues) {
+    for (const line of joinSegments(contourSegments(heights, value))) {
+      const simplified = simplify(line.points, SIMPLIFY_TOLERANCE);
+      if (simplified.length < 3 && !line.closed) continue;
+      const path = toPath(simplified, line.closed);
+      if (path) paths.push(path);
+    }
   }
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${WIDTH} ${HEIGHT}" width="${WIDTH}" height="${HEIGHT}" preserveAspectRatio="xMidYMid slice"><path fill="none" stroke="#000" stroke-width="${STROKE_WIDTH}" stroke-linecap="round" stroke-linejoin="round" d="${paths.join("")}"/></svg>\n`;
 }
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${WIDTH} ${HEIGHT}" width="${WIDTH}" height="${HEIGHT}" preserveAspectRatio="xMidYMid slice"><path fill="none" stroke="#000" stroke-width="${STROKE_WIDTH}" stroke-linecap="round" stroke-linejoin="round" d="${paths.join("")}"/></svg>\n`;
+const outputDir = new URL("../public/topography/", import.meta.url);
+mkdirSync(outputDir, { recursive: true });
 
-const output = new URL("../public/topography.svg", import.meta.url);
-writeFileSync(output, svg);
-console.log(`topography.svg: ${paths.length} linhas, ${(svg.length / 1024).toFixed(1)} KB`);
+SEEDS.forEach((seed, index) => {
+  const svg = buildSvg(seed);
+  const fileName = `${index + 1}.svg`;
+  writeFileSync(new URL(fileName, outputDir), svg);
+  console.log(`topography/${fileName}: ${(svg.length / 1024).toFixed(1)} KB`);
+});
