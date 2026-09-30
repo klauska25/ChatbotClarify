@@ -5,6 +5,7 @@ import { useNow } from "@/hooks/use-now";
 import { sampleConversations } from "@/lib/conversas-exemplo";
 import { createId } from "@/lib/ids";
 import type { Conversation, Message } from "@/lib/types";
+import { BackgroundLines } from "./BackgroundLines";
 import { ChatHeader } from "./ChatHeader";
 import { EmptyState } from "./EmptyState";
 import { MessageInput } from "./MessageInput";
@@ -161,18 +162,24 @@ export function ChatApp() {
           onOpenMenu={() => setIsSidebarOpen(true)}
         />
 
-        {showEmptyState ? (
-          <EmptyState onPickSuggestion={sendMessage} />
-        ) : (
-          // key força remontar ao trocar de conversa, para rolar até o fim.
-          <MessageList
-            key={activeConversation.id}
-            messages={activeConversation.messages}
-            contactName={activeConversation.contactName}
-            isReplying={isReplying}
-            showTime={now !== null}
-          />
-        )}
+        {/* isolate cria uma camada própria: o desenho de fundo (-z-10) fica atrás das
+            mensagens, mas na frente da cor de fundo da página. */}
+        <div className="relative isolate flex min-h-0 flex-1 flex-col overflow-hidden">
+          <BackgroundLines />
+
+          {showEmptyState ? (
+            <EmptyState onPickSuggestion={sendMessage} />
+          ) : (
+            // key força remontar ao trocar de conversa, para rolar até o fim.
+            <MessageList
+              key={activeConversation.id}
+              messages={activeConversation.messages}
+              contactName={activeConversation.contactName}
+              isReplying={isReplying}
+              showTime={now !== null}
+            />
+          )}
+        </div>
 
         <MessageInput onSend={sendMessage} />
       </main>

@@ -25,6 +25,7 @@
   --color-hover: var(--hover);
   --color-selected: var(--selected);
   --color-accent-line: var(--accent-line);
+  --color-pattern-line: var(--pattern-line);
 
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-outfit), var(--font-manrope), ui-sans-serif, sans-serif;
@@ -46,6 +47,8 @@
   --selected: rgb(0 0 0 / 0.045);
   /* Verde mais escuro para bordas: o limão puro some sobre o branco. */
   --accent-line: #65a30d;
+  /* Linhas do desenho de fundo da conversa. */
+  --pattern-line: rgb(77 124 15 / 0.13);
 }
 
 /* Tema escuro. */
@@ -62,6 +65,7 @@
   --hover: rgb(255 255 255 / 0.04);
   --selected: rgb(255 255 255 / 0.045);
   --accent-line: #a3e635;
+  --pattern-line: rgb(163 230 53 / 0.13);
 }
 
 body {
