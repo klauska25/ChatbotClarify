@@ -22,6 +22,20 @@ const NEW_CONVERSATION_TITLE = "Nova conversa";
 const NEW_CONVERSATION_CONTACT = "Visitante";
 const TITLE_MAX_LENGTH = 48;
 
+// O chat abre numa conversa nova. O id é fixo (e não aleatório) para o servidor e o
+// navegador escolherem o mesmo desenho de fundo e o HTML bater nos dois.
+const INITIAL_CONVERSATION_ID = "initial-conversation";
+
+function createEmptyConversation(id: string): Conversation {
+  return {
+    id,
+    title: NEW_CONVERSATION_TITLE,
+    contactName: NEW_CONVERSATION_CONTACT,
+    createdAt: Date.now(),
+    messages: [],
+  };
+}
+
 function getLastActivity(conversation: Conversation): number {
   return conversation.messages.at(-1)?.sentAt ?? conversation.createdAt;
 }
@@ -34,8 +48,11 @@ function titleFromText(text: string): string {
 }
 
 export function ChatApp() {
-  const [conversations, setConversations] = useState<Conversation[]>(sampleConversations);
-  const [activeId, setActiveId] = useState<string>(sampleConversations[0].id);
+  const [conversations, setConversations] = useState<Conversation[]>(() => [
+    createEmptyConversation(INITIAL_CONVERSATION_ID),
+    ...sampleConversations,
+  ]);
+  const [activeId, setActiveId] = useState<string>(INITIAL_CONVERSATION_ID);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   // Conversas que estão esperando a resposta do atendente.
   const [replyingIds, setReplyingIds] = useState<ReadonlySet<string>>(new Set());
@@ -130,13 +147,7 @@ export function ChatApp() {
       return;
     }
 
-    const conversation: Conversation = {
-      id: createId("conv"),
-      title: NEW_CONVERSATION_TITLE,
-      contactName: NEW_CONVERSATION_CONTACT,
-      createdAt: Date.now(),
-      messages: [],
-    };
+    const conversation = createEmptyConversation(createId("conv"));
     setConversations((previous) => [conversation, ...previous]);
     selectConversation(conversation.id);
   }
@@ -148,7 +159,11 @@ export function ChatApp() {
     // mas na frente da cor de fundo da página.
     <div className="relative isolate flex h-dvh overflow-hidden bg-surface md:gap-3 md:p-3">
       <AmbientGlow />
-      <BackgroundTopography conversationId={activeConversation.id} />
+      {/* Na conversa vazia as linhas se movem devagar; com mensagens, ficam paradas. */}
+      <BackgroundTopography
+        conversationId={activeConversation.id}
+        isMoving={activeConversation.messages.length === 0}
+      />
 
       <Sidebar
         conversations={sortedConversations}

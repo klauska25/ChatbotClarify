@@ -8,13 +8,16 @@ const MASK_SIZE = "max(100%, 1600px, 160dvh) auto";
 
 interface BackgroundTopographyProps {
   conversationId: string;
+  // Verdadeiro na conversa vazia: as linhas derivam devagar até a primeira mensagem.
+  isMoving: boolean;
 }
 
-// Linhas de relevo decorativas no fundo da página, visíveis através dos painéis de vidro. Cada conversa usa um dos desenhos de
-// public/topography/, aplicado como máscara: as linhas recebem a cor --pattern-line do tema.
-export function BackgroundTopography({ conversationId }: BackgroundTopographyProps) {
+// Linhas de relevo decorativas no fundo da página, visíveis através dos painéis de vidro.
+// Cada conversa usa um dos desenhos de public/topography/, aplicado como máscara:
+// as linhas recebem a cor --pattern-line do tema.
+export function BackgroundTopography({ conversationId, isMoving }: BackgroundTopographyProps) {
   const url = `url(${getTopographyUrl(conversationId)})`;
-  const maskStyle: CSSProperties = {
+  const linesStyle: CSSProperties = {
     maskImage: url,
     WebkitMaskImage: url,
     maskSize: MASK_SIZE,
@@ -23,15 +26,24 @@ export function BackgroundTopography({ conversationId }: BackgroundTopographyPro
     WebkitMaskPosition: "center",
     maskRepeat: "no-repeat",
     WebkitMaskRepeat: "no-repeat",
+    // Pausar (em vez de tirar a animação) congela as linhas onde estão, sem salto.
+    animationPlayState: isMoving ? "running" : "paused",
   };
 
   return (
+    // key recria o fundo ao trocar de desenho, o que dispara o fade-in.
     <div
-      // key faz o elemento ser recriado ao trocar de desenho, o que dispara o fade-in.
       key={url}
-      className="pointer-events-none absolute inset-0 -z-10 bg-pattern-line motion-safe:animate-fade-in"
-      style={maskStyle}
+      className="pointer-events-none absolute inset-0 -z-10 overflow-hidden motion-safe:animate-fade-in"
       aria-hidden="true"
-    />
+    >
+      {/* Maior que a tela (-8% em cada lado) para as bordas não aparecerem enquanto se move.
+          will-change deixa o movimento na placa de vídeo, sem redesenhar as linhas. */}
+      <div
+        data-topography-lines
+        className="absolute -inset-[8%] bg-pattern-line will-change-transform motion-safe:animate-topography-drift"
+        style={linesStyle}
+      />
+    </div>
   );
 }
