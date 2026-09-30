@@ -29,6 +29,11 @@ void main() {
 
 // Ruído simplex 3D: "Array and textureless GLSL 2D/3D/4D simplex noise functions",
 // Ian McEwan e Ashima Arts (licença MIT), https://github.com/ashima/webgl-noise
+//
+// Diferença do original: o raio de influência de cada ponto é 0.5 em vez de 0.6. Com 0.6
+// o ruído tem pequenos degraus ao longo das bordas internas da grade, e uma linha de relevo
+// que cai num degrau aparece como um risco reto e tracejado. O fator final (80 em vez de 42)
+// compensa o raio menor, para o ruído manter a mesma intensidade.
 const FRAGMENT_SHADER = `#version 300 es
 precision highp float;
 
@@ -87,9 +92,9 @@ float snoise(vec3 v) {
   p1 *= norm.y;
   p2 *= norm.z;
   p3 *= norm.w;
-  vec4 m = max(0.6 - vec4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
+  vec4 m = max(0.5 - vec4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
   m = m * m;
-  return 42.0 * dot(m * m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
+  return 80.0 * dot(m * m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
 }
 
 // Mesmas escalas do script das versões estáticas.
