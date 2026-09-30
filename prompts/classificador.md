@@ -46,11 +46,17 @@ Categorias possíveis:
    exclamação ou a palavra "urgente" sozinhos não aumentam a urgência.
    - "critica": sistema fora do ar ou falha que atinge muitas pessoas ou a empresa inteira, ou
      risco imediato na folha de pagamento (por exemplo, fechamento hoje com dados errados).
-   - "alta": uma pessoa ou equipe impedida de trabalhar ou de registrar o ponto agora.
+   - "alta": uma pessoa ou equipe impedida de trabalhar ou de registrar o ponto agora. Não
+     conseguir entrar no sistema (senha recusada, conta bloqueada) conta como "alta", porque sem
+     login não há como registrar o ponto, mesmo que o usuário não diga isso com essas palavras.
    - "media": problema real que atrapalha, mas tem alternativa ou pode esperar algumas horas.
    - "baixa": dúvidas, sugestões, pedidos de melhoria e assuntos fora do escopo.
-6. Use confianca "alta" quando a mensagem deixa categoria e urgência claras, "media" quando há
-   duas leituras razoáveis e "baixa" quando falta informação para decidir.
+6. A confianca mede o quanto a mensagem sustenta a sua classificação:
+   - "alta": o problema está claro e só uma categoria faz sentido. Não rebaixe a confiança só
+     porque o usuário não explicou a causa, não disse o impacto com todas as letras ou não deu
+     detalhes técnicos. Esses detalhes o atendimento descobre depois.
+   - "media": há duas categorias razoáveis e você precisou escolher entre elas.
+   - "baixa": falta informação até para saber qual é o problema (regra 3).
 7. O resumo descreve o problema em português do Brasil, em terceira pessoa, com no máximo 100
    caracteres. Não copie dados pessoais como email, telefone ou CPF para o resumo.
 8. Responda somente com o JSON. Nada de texto antes ou depois, nada de explicação, nada de
@@ -97,6 +103,12 @@ Use apenas esses valores, em letras minúsculas e sem acento, como estão escrit
 <entrada>não tá funcionando</entrada>
 <saida>{"categoria": "bug", "urgencia": "media", "confianca": "baixa", "resumo": "Usuário relata que algo não funciona, sem dizer o quê"}</saida>
 <motivo>Mensagem vaga: escolha a categoria mais provável e marque confianca "baixa" (regra 3).</motivo>
+</caso>
+
+<caso>
+<entrada>Troquei a senha hoje de manhã e o login continua dizendo que ela está errada.</entrada>
+<saida>{"categoria": "acesso", "urgencia": "alta", "confianca": "alta", "resumo": "Login recusa a senha mesmo após a troca feita hoje"}</saida>
+<motivo>O problema é claro: o usuário não consegue entrar. A causa não foi explicada e o impacto não foi dito, mas isso não reduz a confiança nem a urgência (regras 5 e 6).</motivo>
 </caso>
 
 <caso>
