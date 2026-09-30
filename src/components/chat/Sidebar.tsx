@@ -1,6 +1,11 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import { CloseIcon, PlusIcon } from "@/components/icons";
+import { searchConversations } from "@/lib/search-conversations";
 import type { Conversation } from "@/lib/types";
 import { ConversationListItem } from "./ConversationListItem";
+import { SearchField } from "./SearchField";
 
 export const SIDEBAR_ID = "conversation-sidebar";
 
@@ -24,6 +29,12 @@ export function Sidebar({
   onNewConversation,
   onClose,
 }: SidebarProps) {
+  const [query, setQuery] = useState("");
+  const visibleConversations = useMemo(
+    () => searchConversations(conversations, query),
+    [conversations, query],
+  );
+
   return (
     <>
       {/* Fundo escurecido atrás da gaveta no celular; tocar nele fecha a gaveta. */}
@@ -63,7 +74,7 @@ export function Sidebar({
           </button>
         </div>
 
-        <div className="border-b border-line px-4 pt-5 pb-4">
+        <div className="space-y-3 border-b border-line px-4 pt-5 pb-4">
           <button
             type="button"
             onClick={onNewConversation}
@@ -72,14 +83,20 @@ export function Sidebar({
             <PlusIcon />
             Nova conversa
           </button>
+
+          <SearchField value={query} onChange={setQuery} />
         </div>
 
         <h2 className="px-5 pt-5 pb-3 font-mono text-[11px] tracking-[0.2em] text-muted uppercase">
           Conversas
         </h2>
 
+        {visibleConversations.length === 0 && (
+          <p className="px-5 text-sm text-muted">Nenhum atendimento encontrado.</p>
+        )}
+
         <ul className="flex-1 space-y-1 overflow-y-auto px-2 pb-4">
-          {conversations.map((conversation) => (
+          {visibleConversations.map((conversation) => (
             <ConversationListItem
               key={conversation.id}
               conversation={conversation}
