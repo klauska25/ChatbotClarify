@@ -13,7 +13,7 @@ export function EmptyState({ onPickSuggestion }: EmptyStateProps) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-10">
       <div className="w-full max-w-[680px]">
-        <h2 className="text-center font-display text-2xl font-medium text-white">
+        <h2 className="text-center font-display text-2xl font-medium text-fg">
           Como posso ajudar?
         </h2>
 
@@ -23,7 +23,7 @@ export function EmptyState({ onPickSuggestion }: EmptyStateProps) {
               <button
                 type="button"
                 onClick={() => onPickSuggestion(suggestion)}
-                className="h-full w-full rounded-lg border border-neutral-600 bg-surface px-4 py-3 text-left text-sm leading-snug text-neutral-100 transition-colors hover:border-brand hover:bg-brand/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                className="h-full w-full rounded-lg border border-line-strong bg-panel px-4 py-3 text-left text-sm leading-snug text-fg transition-colors hover:border-accent-line hover:bg-brand/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-line"
               >
                 {suggestion}
               </button>

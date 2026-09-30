@@ -25,23 +25,23 @@ export function ConversationListItem({
         type="button"
         onClick={() => onSelect(conversation.id)}
         aria-current={isActive ? "true" : undefined}
-        className={`w-full rounded-lg border px-3 py-3.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-brand ${
+        className={`w-full rounded-lg border px-3 py-3.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-accent-line ${
           isActive
-            ? "border-neutral-700 bg-white/[0.04]"
-            : "border-transparent hover:bg-white/[0.03]"
+            ? "border-line-strong bg-selected"
+            : "border-transparent hover:bg-hover"
         }`}
       >
         <div className="flex items-baseline justify-between gap-3">
-          <span className="truncate text-sm font-bold text-white">
+          <span className="truncate text-sm font-bold text-fg">
             {conversation.contactName}
           </span>
           {/* O tempo só aparece no navegador; ver useNow. */}
-          <span className="shrink-0 font-mono text-xs text-neutral-400">
+          <span className="shrink-0 font-mono text-xs text-muted">
             {now !== null ? formatRelativeTime(lastActivity, now) : ""}
           </span>
         </div>
 
-        <p className="mt-1 truncate text-sm text-neutral-400">{preview}</p>
+        <p className="mt-1 truncate text-sm text-muted">{preview}</p>
 
         {conversation.category && (
           <div className="mt-2.5">

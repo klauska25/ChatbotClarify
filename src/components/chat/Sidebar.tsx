@@ -45,10 +45,10 @@ export function Sidebar({
       >
         <div className="flex items-center justify-between px-5 pt-5">
           <p className="flex items-baseline gap-2.5">
-            <span className="font-display text-2xl font-bold tracking-tight text-white">
+            <span className="font-display text-2xl font-bold tracking-tight text-fg">
               TimeTrack
             </span>
-            <span className="text-[11px] font-medium tracking-[0.2em] text-neutral-400 uppercase">
+            <span className="text-[11px] font-medium tracking-[0.2em] text-muted uppercase">
               Suporte
             </span>
           </p>
@@ -56,7 +56,7 @@ export function Sidebar({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1.5 text-neutral-400 hover:bg-white/10 hover:text-white md:hidden"
+            className="rounded-md p-1.5 text-muted hover:bg-hover hover:text-fg md:hidden"
             aria-label="Fechar lista de conversas"
           >
             <CloseIcon />
@@ -67,14 +67,14 @@ export function Sidebar({
           <button
             type="button"
             onClick={onNewConversation}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-brand px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-accent-line px-4 py-2.5 text-sm font-bold text-fg transition-colors hover:bg-brand/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-line"
           >
             <PlusIcon />
             Nova conversa
           </button>
         </div>
 
-        <h2 className="px-5 pt-5 pb-3 font-mono text-[11px] tracking-[0.2em] text-neutral-400 uppercase">
+        <h2 className="px-5 pt-5 pb-3 font-mono text-[11px] tracking-[0.2em] text-muted uppercase">
           Conversas
         </h2>
 

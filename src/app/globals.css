@@ -1,31 +1,70 @@
 @import "tailwindcss";
 
-/* Paleta do TimeTrack Suporte: tema escuro, verde-limão como destaque. */
+/* A variante dark: segue o tema escolhido no botão (atributo data-theme no <html>),
+   e não só a preferência do sistema. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Cores fixas da marca, iguais nos dois temas. */
 @theme {
   --color-brand: #a3e635;
   --color-brand-hover: #bef264;
   --color-brand-dark: #4d7c0f;
   --color-ink: #0a0a0a;
-
-  /* Superfícies do tema escuro, da mais funda para a mais elevada. */
-  --color-surface: #0e0e0e;
-  --color-panel: #151515;
-  --color-raised: #1d1d1d;
-  --color-line: #292929;
 }
 
+/* Cores que mudam com o tema. Os valores ficam nas variáveis abaixo. */
 @theme inline {
+  --color-surface: var(--surface);
+  --color-panel: var(--panel);
+  --color-raised: var(--raised);
+  --color-field: var(--field);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-hover: var(--hover);
+  --color-selected: var(--selected);
+  --color-accent-line: var(--accent-line);
+
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-outfit), var(--font-manrope), ui-sans-serif, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 }
 
-html {
-  /* Barras de rolagem e controles nativos no tema escuro. */
+/* Tema claro. */
+:root {
+  color-scheme: light;
+  --surface: #f5f5f3;
+  --panel: #ffffff;
+  --raised: #ebebe8;
+  --field: #ffffff;
+  --line: #e4e4e0;
+  --line-strong: #cfcfca;
+  --fg: #141414;
+  --muted: #6b6b66;
+  --hover: rgb(0 0 0 / 0.04);
+  --selected: rgb(0 0 0 / 0.045);
+  /* Verde mais escuro para bordas: o limão puro some sobre o branco. */
+  --accent-line: #65a30d;
+}
+
+/* Tema escuro. */
+:root[data-theme="dark"] {
   color-scheme: dark;
+  --surface: #0e0e0e;
+  --panel: #151515;
+  --raised: #1d1d1d;
+  --field: #1d1d1d;
+  --line: #292929;
+  --line-strong: #4a4a4a;
+  --fg: #f5f5f5;
+  --muted: #9a9a9a;
+  --hover: rgb(255 255 255 / 0.04);
+  --selected: rgb(255 255 255 / 0.045);
+  --accent-line: #a3e635;
 }
 
 body {
-  background: var(--color-surface);
-  color: #f5f5f5;
+  background: var(--surface);
+  color: var(--fg);
 }

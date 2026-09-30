@@ -20,12 +20,12 @@ export function MessageBubble({ message, contactName, showTime }: MessageBubbleP
         className={`max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed break-words whitespace-pre-wrap md:max-w-[70%] ${
           isUser
             ? "bg-brand text-ink"
-            : "border border-line bg-raised text-neutral-100"
+            : "border border-line bg-raised text-fg"
         }`}
       >
         {message.text}
       </div>
-      <p className="mt-1.5 px-1 font-mono text-[11px] text-neutral-400">
+      <p className="mt-1.5 px-1 font-mono text-[11px] text-muted">
         {author}
         {showTime && ` · ${formatClockTime(message.sentAt)}`}
       </p>

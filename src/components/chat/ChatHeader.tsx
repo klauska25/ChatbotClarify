@@ -2,6 +2,7 @@ import { MenuIcon } from "@/components/icons";
 import type { Category } from "@/lib/types";
 import { CategoryBadge } from "./CategoryBadge";
 import { SIDEBAR_ID } from "./Sidebar";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface ChatHeaderProps {
   title: string;
@@ -16,7 +17,7 @@ export function ChatHeader({ title, category, isMenuOpen, onOpenMenu }: ChatHead
       <button
         type="button"
         onClick={onOpenMenu}
-        className="-ml-1.5 rounded-md p-1.5 text-neutral-300 hover:bg-white/10 md:hidden"
+        className="-ml-1.5 rounded-md p-1.5 text-muted hover:bg-hover hover:text-fg md:hidden"
         aria-label="Abrir lista de conversas"
         aria-controls={SIDEBAR_ID}
         aria-expanded={isMenuOpen}
@@ -24,10 +25,12 @@ export function ChatHeader({ title, category, isMenuOpen, onOpenMenu }: ChatHead
         <MenuIcon />
       </button>
 
-      <div className="flex min-w-0 items-center gap-3">
-        <h1 className="truncate font-display text-lg font-medium text-white">{title}</h1>
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <h1 className="truncate font-display text-lg font-medium text-fg">{title}</h1>
         {category && <CategoryBadge category={category} />}
       </div>
+
+      <ThemeToggle />
     </header>
   );
 }
