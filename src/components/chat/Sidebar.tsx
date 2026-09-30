@@ -41,21 +41,22 @@ export function Sidebar({
       {/* Fundo escurecido atrás da gaveta no celular; tocar nele fecha a gaveta. */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/60 md:hidden"
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
           onClick={onClose}
           aria-hidden="true"
         />
       )}
 
-      {/* "invisible" tira a gaveta fechada da navegação por teclado no celular. */}
+      {/* Painel de vidro. No celular é uma gaveta mais opaca, para o texto continuar legível.
+          "invisible" tira a gaveta fechada da navegação por teclado. */}
       <aside
         id={SIDEBAR_ID}
         aria-label="Conversas"
-        className={`fixed inset-y-0 left-0 z-40 flex w-80 max-w-[85vw] flex-col border-r border-line bg-panel transition-[transform,visibility] duration-200 ease-out md:visible md:static md:w-[310px] md:translate-x-0 ${
+        className={`glass fixed inset-y-0 left-0 z-40 flex w-80 max-w-[85vw] flex-col rounded-r-3xl transition-[transform,visibility] duration-300 ease-out max-md:[background:var(--glass-strong)] md:visible md:static md:w-[300px] md:translate-x-0 md:rounded-3xl ${
           isOpen ? "visible translate-x-0" : "invisible -translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between px-5 pt-5">
+        <div className="flex items-center justify-between px-5 pt-6">
           <p className="flex items-baseline gap-2.5">
             <span className="font-display text-2xl font-bold tracking-tight text-fg">
               TimeTrack
@@ -68,35 +69,37 @@ export function Sidebar({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1.5 text-muted hover:bg-hover hover:text-fg md:hidden"
+            className="rounded-full p-1.5 text-muted hover:bg-hover hover:text-fg md:hidden"
             aria-label="Fechar lista de conversas"
           >
             <CloseIcon />
           </button>
         </div>
 
-        <div className="space-y-3 border-b border-line px-4 pt-5 pb-4">
+        <div className="space-y-3.5 px-4 pt-6 pb-2">
           <button
             type="button"
             onClick={onNewConversation}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-accent-line px-4 py-2.5 text-sm font-bold text-fg transition-colors hover:bg-brand/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-line"
+            className="neu-raised flex w-full items-center justify-center gap-2.5 rounded-full bg-neu px-4 py-3 text-sm font-bold text-fg transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:neu-inset focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-line"
           >
-            <PlusIcon />
+            <span className="glow-brand grid size-6 place-items-center rounded-full bg-brand text-ink">
+              <PlusIcon className="size-3.5" />
+            </span>
             Nova conversa
           </button>
 
           <SearchField value={query} onChange={setQuery} />
         </div>
 
-        <h2 className="px-5 pt-5 pb-3 font-mono text-[11px] tracking-[0.2em] text-muted uppercase">
+        <h2 className="px-5 pt-5 pb-2 font-mono text-[11px] tracking-[0.2em] text-muted uppercase">
           Conversas
         </h2>
 
         {visibleConversations.length === 0 && (
-          <p className="px-5 text-sm text-muted">Nenhum atendimento encontrado.</p>
+          <p className="px-5 pt-1 text-sm text-muted">Nenhum atendimento encontrado.</p>
         )}
 
-        <ul className="flex-1 space-y-1 overflow-y-auto px-2 pb-4">
+        <ul className="flex-1 space-y-1.5 overflow-y-auto px-3 pt-1 pb-3">
           {visibleConversations.map((conversation) => (
             <ConversationListItem
               key={conversation.id}

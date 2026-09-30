@@ -3,7 +3,7 @@ export function TypingIndicator() {
   return (
     <div className="flex justify-start">
       <div
-        className="flex items-center gap-1 rounded-2xl border border-line bg-raised px-4 py-4"
+        className="glass-soft flex items-center gap-1 rounded-[22px] px-4 py-4"
         role="status"
         aria-label="Atendente digitando"
       >

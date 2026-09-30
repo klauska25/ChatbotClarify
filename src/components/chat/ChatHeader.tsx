@@ -13,11 +13,11 @@ interface ChatHeaderProps {
 
 export function ChatHeader({ title, category, isMenuOpen, onOpenMenu }: ChatHeaderProps) {
   return (
-    <header className="flex h-[60px] shrink-0 items-center gap-3 border-b border-line bg-panel px-4 md:px-6">
+    <header className="glass flex h-14 shrink-0 items-center gap-3 rounded-2xl px-4 md:h-16 md:rounded-3xl md:px-6">
       <button
         type="button"
         onClick={onOpenMenu}
-        className="-ml-1.5 rounded-md p-1.5 text-muted hover:bg-hover hover:text-fg md:hidden"
+        className="-ml-1.5 rounded-full p-1.5 text-muted hover:bg-hover hover:text-fg md:hidden"
         aria-label="Abrir lista de conversas"
         aria-controls={SIDEBAR_ID}
         aria-expanded={isMenuOpen}

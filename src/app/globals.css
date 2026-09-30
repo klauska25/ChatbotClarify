@@ -26,17 +26,14 @@
 /* Cores que mudam com o tema. Os valores ficam nas variáveis abaixo. */
 @theme inline {
   --color-surface: var(--surface);
-  --color-panel: var(--panel);
-  --color-raised: var(--raised);
-  --color-field: var(--field);
+  --color-neu: var(--neu);
   --color-line: var(--line);
-  --color-line-strong: var(--line-strong);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
   --color-hover: var(--hover);
-  --color-selected: var(--selected);
   --color-accent-line: var(--accent-line);
   --color-pattern-line: var(--pattern-line);
+  --color-glow: var(--glow);
 
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-outfit), var(--font-manrope), ui-sans-serif, sans-serif;
@@ -46,37 +43,88 @@
 /* Tema claro. */
 :root {
   color-scheme: light;
-  --surface: #f5f5f3;
-  --panel: #ffffff;
-  --raised: #ebebe8;
-  --field: #ffffff;
-  --line: #e4e4e0;
-  --line-strong: #cfcfca;
+  --surface: #ebebe7;
+  --line: #deded9;
   --fg: #141414;
   --muted: #6b6b66;
   --hover: rgb(0 0 0 / 0.04);
-  --selected: rgb(0 0 0 / 0.045);
   /* Verde mais escuro para bordas: o limão puro some sobre o branco. */
   --accent-line: #65a30d;
-  /* Linhas do desenho de fundo da conversa. */
-  --pattern-line: rgb(77 124 15 / 0.13);
+  /* Linhas de relevo e brilho do fundo. */
+  --pattern-line: rgb(77 124 15 / 0.14);
+  --glow: rgb(163 230 53 / 0.28);
+
+  /* Vidro: painéis translúcidos que desfocam o fundo. */
+  --glass: rgb(255 255 255 / 0.55);
+  --glass-strong: rgb(250 250 248 / 0.9);
+  --glass-border: rgb(255 255 255 / 0.75);
+  --glass-highlight: rgb(255 255 255 / 0.9);
+  --glass-shadow: 0 24px 60px -28px rgb(0 0 0 / 0.22);
+
+  /* Relevo suave: elementos que saltam (raised) ou afundam (inset) da superfície. */
+  --neu: rgb(246 246 243 / 0.85);
+  --neu-raised: -5px -5px 12px rgb(255 255 255 / 0.85), 5px 5px 14px rgb(0 0 0 / 0.09);
+  --neu-inset: inset 3px 3px 7px rgb(0 0 0 / 0.08), inset -3px -3px 7px rgb(255 255 255 / 0.9);
 }
 
 /* Tema escuro. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --surface: #0e0e0e;
-  --panel: #151515;
-  --raised: #1d1d1d;
-  --field: #1d1d1d;
+  --surface: #0c0c0c;
   --line: #292929;
-  --line-strong: #4a4a4a;
   --fg: #f5f5f5;
   --muted: #9a9a9a;
-  --hover: rgb(255 255 255 / 0.04);
-  --selected: rgb(255 255 255 / 0.045);
+  --hover: rgb(255 255 255 / 0.05);
   --accent-line: #a3e635;
   --pattern-line: rgb(163 230 53 / 0.13);
+  --glow: rgb(163 230 53 / 0.11);
+
+  --glass: rgb(26 26 26 / 0.55);
+  --glass-strong: rgb(22 22 22 / 0.92);
+  --glass-border: rgb(255 255 255 / 0.08);
+  --glass-highlight: rgb(255 255 255 / 0.07);
+  --glass-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.8);
+
+  --neu: rgb(36 36 36 / 0.7);
+  --neu-raised: -3px -3px 8px rgb(255 255 255 / 0.035), 5px 5px 14px rgb(0 0 0 / 0.55),
+    inset 0 1px 0 rgb(255 255 255 / 0.05);
+  --neu-inset: inset 3px 3px 8px rgb(0 0 0 / 0.55), inset -2px -2px 6px rgb(255 255 255 / 0.04);
+}
+
+/* Painel de vidro fosco (lista, topo e campo de mensagem). */
+@utility glass {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  backdrop-filter: blur(28px) saturate(160%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+}
+
+/* Vidro mais leve para elementos pequenos (balões e sugestões). */
+@utility glass-soft {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 22px -14px rgb(0 0 0 / 0.35), inset 0 1px 0 var(--glass-highlight);
+}
+
+@utility neu-raised {
+  box-shadow: var(--neu-raised);
+}
+
+@utility neu-inset {
+  box-shadow: var(--neu-inset);
+}
+
+/* Brilho verde discreto nos elementos principais (balão do usuário, botão Enviar). */
+@utility glow-brand {
+  box-shadow: 0 10px 26px -12px rgb(163 230 53 / 0.65), inset 0 1px 0 rgb(255 255 255 / 0.45);
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
 }
 
 body {

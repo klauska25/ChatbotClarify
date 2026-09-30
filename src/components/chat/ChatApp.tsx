@@ -5,6 +5,7 @@ import { useNow } from "@/hooks/use-now";
 import { sampleConversations } from "@/lib/conversas-exemplo";
 import { createId } from "@/lib/ids";
 import type { Conversation, Message } from "@/lib/types";
+import { AmbientGlow } from "./AmbientGlow";
 import { BackgroundTopography } from "./BackgroundTopography";
 import { ChatHeader } from "./ChatHeader";
 import { EmptyState } from "./EmptyState";
@@ -143,7 +144,12 @@ export function ChatApp() {
   const showEmptyState = activeConversation.messages.length === 0 && !isReplying;
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-surface">
+    // isolate cria uma camada própria: o fundo (-z-10) fica atrás dos painéis de vidro,
+    // mas na frente da cor de fundo da página.
+    <div className="relative isolate flex h-dvh overflow-hidden bg-surface md:gap-3 md:p-3">
+      <AmbientGlow />
+      <BackgroundTopography conversationId={activeConversation.id} />
+
       <Sidebar
         conversations={sortedConversations}
         activeConversationId={activeConversation.id}
@@ -154,7 +160,7 @@ export function ChatApp() {
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      <main className="flex min-w-0 flex-1 flex-col">
+      <main className="flex min-w-0 flex-1 flex-col gap-2 p-2 md:gap-3 md:p-0">
         <ChatHeader
           title={activeConversation.title}
           category={activeConversation.category}
@@ -162,11 +168,7 @@ export function ChatApp() {
           onOpenMenu={() => setIsSidebarOpen(true)}
         />
 
-        {/* isolate cria uma camada própria: o desenho de fundo (-z-10) fica atrás das
-            mensagens, mas na frente da cor de fundo da página. */}
-        <div className="relative isolate flex min-h-0 flex-1 flex-col overflow-hidden">
-          <BackgroundTopography conversationId={activeConversation.id} />
-
+        <div className="flex min-h-0 flex-1 flex-col">
           {showEmptyState ? (
             <EmptyState onPickSuggestion={sendMessage} />
           ) : (

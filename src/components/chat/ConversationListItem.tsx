@@ -25,10 +25,8 @@ export function ConversationListItem({
         type="button"
         onClick={() => onSelect(conversation.id)}
         aria-current={isActive ? "true" : undefined}
-        className={`w-full rounded-lg border px-3 py-3.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-accent-line ${
-          isActive
-            ? "border-line-strong bg-selected"
-            : "border-transparent hover:bg-hover"
+        className={`w-full rounded-2xl px-3.5 py-3.5 text-left transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-accent-line ${
+          isActive ? "neu-raised bg-neu" : "hover:bg-hover"
         }`}
       >
         <div className="flex items-baseline justify-between gap-3">

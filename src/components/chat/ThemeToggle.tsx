@@ -11,7 +11,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggleTheme}
-      className="grid size-9 shrink-0 place-items-center rounded-full border border-line text-muted transition-colors hover:bg-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-accent-line"
+      className="neu-raised grid size-9 shrink-0 place-items-center rounded-full bg-neu text-muted transition-colors hover:text-fg active:neu-inset focus-visible:outline-2 focus-visible:outline-accent-line"
       aria-label={label}
       title={label}
     >

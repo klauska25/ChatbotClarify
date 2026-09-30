@@ -10,7 +10,7 @@ interface BackgroundTopographyProps {
   conversationId: string;
 }
 
-// Linhas de relevo decorativas atrás das mensagens. Cada conversa usa um dos desenhos de
+// Linhas de relevo decorativas no fundo da página, visíveis através dos painéis de vidro. Cada conversa usa um dos desenhos de
 // public/topography/, aplicado como máscara: as linhas recebem a cor --pattern-line do tema.
 export function BackgroundTopography({ conversationId }: BackgroundTopographyProps) {
   const url = `url(${getTopographyUrl(conversationId)})`;

@@ -18,7 +18,7 @@ export function SearchField({ value, onChange }: SearchFieldProps) {
         }}
         placeholder="Buscar atendimentos"
         aria-label="Buscar atendimentos"
-        className="w-full rounded-full border border-line-strong bg-field py-2.5 pr-10 pl-10 text-sm text-fg outline-none transition-colors placeholder:text-muted focus:border-accent-line [&::-webkit-search-cancel-button]:appearance-none"
+        className="neu-inset w-full rounded-full border border-transparent bg-neu py-2.5 pr-10 pl-10 text-sm text-fg outline-none transition-colors placeholder:text-muted focus:border-accent-line/60 [&::-webkit-search-cancel-button]:appearance-none"
       />
       {value && (
         <button
