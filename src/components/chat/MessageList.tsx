@@ -15,11 +15,14 @@ interface MessageListProps {
 export function MessageList({ messages, contactName, isReplying, showTime }: MessageListProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Acompanha a resposta enquanto ela cresce aos pedaços, não só quando chega mensagem nova.
+  const lastMessageText = messages.at(-1)?.text;
+
   // Mantém a mensagem mais recente visível sempre que algo novo aparece.
   useEffect(() => {
     const container = containerRef.current;
     if (container) container.scrollTop = container.scrollHeight;
-  }, [messages.length, isReplying]);
+  }, [messages.length, lastMessageText, isReplying]);
 
   return (
     <div ref={containerRef} className="flex-1 overflow-y-auto" role="log">

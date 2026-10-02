@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNow } from "@/hooks/use-now";
+import { streamChatReply } from "@/lib/chat-stream";
 import { sampleConversations } from "@/lib/conversas-exemplo";
 import { createId } from "@/lib/ids";
 import type { Conversation, Message } from "@/lib/types";
@@ -12,11 +13,6 @@ import { LiveTopography } from "./LiveTopography";
 import { MessageInput } from "./MessageInput";
 import { MessageList } from "./MessageList";
 import { Sidebar } from "./Sidebar";
-
-// Resposta fixa enquanto o chatbot ainda não está ligado à IA.
-const PLACEHOLDER_REPLY =
-  "Ainda estou aprendendo a responder. No Dia 4 eu ganho um cérebro!";
-const REPLY_DELAY_MS = 500;
 
 const NEW_CONVERSATION_TITLE = "Nova conversa";
 const NEW_CONVERSATION_CONTACT = "Visitante";
@@ -56,13 +52,13 @@ export function ChatApp() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   // Conversas que estão esperando a resposta do atendente.
   const [replyingIds, setReplyingIds] = useState<ReadonlySet<string>>(new Set());
-  const replyTimers = useRef<number[]>([]);
+  // Respostas em andamento, para cancelar os pedidos se o componente sair da tela.
+  const pendingReplies = useRef<Set<AbortController>>(new Set());
   const now = useNow();
 
-  // Cancela respostas agendadas se o componente sair da tela.
   useEffect(() => {
-    const timers = replyTimers.current;
-    return () => timers.forEach((timer) => window.clearTimeout(timer));
+    const replies = pendingReplies.current;
+    return () => replies.forEach((controller) => controller.abort());
   }, []);
 
   // Esc fecha a gaveta no celular.
@@ -99,6 +95,21 @@ export function ChatApp() {
     );
   }
 
+  // Acrescenta um pedaço ao texto de uma mensagem que já está na tela (resposta em streaming).
+  function appendToMessage(conversationId: string, messageId: string, text: string) {
+    setConversations((previous) =>
+      previous.map((conversation) => {
+        if (conversation.id !== conversationId) return conversation;
+        return {
+          ...conversation,
+          messages: conversation.messages.map((message) =>
+            message.id === messageId ? { ...message, text: message.text + text } : message,
+          ),
+        };
+      }),
+    );
+  }
+
   function setReplying(conversationId: string, replying: boolean) {
     setReplyingIds((previous) => {
       const next = new Set(previous);
@@ -108,28 +119,53 @@ export function ChatApp() {
     });
   }
 
-  function sendMessage(text: string) {
+  async function sendMessage(text: string) {
     const conversationId = activeConversation.id;
+    if (replyingIds.has(conversationId)) return;
 
-    appendMessage(conversationId, {
-      id: createId("msg"),
-      role: "user",
-      text,
-      sentAt: Date.now(),
-    });
+    const userMessage: Message = { id: createId("msg"), role: "user", text, sentAt: Date.now() };
+    // O histórico é montado aqui porque o estado só é atualizado depois deste render.
+    const history = [...activeConversation.messages, userMessage].map((message) => ({
+      role: message.role,
+      content: message.text,
+    }));
+
+    appendMessage(conversationId, userMessage);
     setReplying(conversationId, true);
 
-    const timer = window.setTimeout(() => {
-      appendMessage(conversationId, {
-        id: createId("msg"),
-        role: "assistant",
-        text: PLACEHOLDER_REPLY,
-        sentAt: Date.now(),
-      });
-      setReplying(conversationId, false);
-      replyTimers.current = replyTimers.current.filter((id) => id !== timer);
-    }, REPLY_DELAY_MS);
-    replyTimers.current.push(timer);
+    const controller = new AbortController();
+    pendingReplies.current.add(controller);
+    // A bolha do atendente só aparece com o primeiro pedaço de texto. Até lá fica
+    // o indicador de digitando.
+    let replyId: string | null = null;
+
+    function addToReply(chunk: string) {
+      if (replyId === null) {
+        replyId = createId("msg");
+        appendMessage(conversationId, {
+          id: replyId,
+          role: "assistant",
+          text: chunk,
+          sentAt: Date.now(),
+        });
+        setReplying(conversationId, false);
+      } else {
+        appendToMessage(conversationId, replyId, chunk);
+      }
+    }
+
+    await streamChatReply(
+      history,
+      {
+        onText: addToReply,
+        // Se a resposta já começou, o aviso vai no fim dela em vez de numa bolha nova.
+        onError: (message) => addToReply(replyId === null ? message : `\n\n${message}`),
+      },
+      controller.signal,
+    );
+
+    pendingReplies.current.delete(controller);
+    setReplying(conversationId, false);
   }
 
   function selectConversation(conversationId: string) {
@@ -198,7 +234,7 @@ export function ChatApp() {
           )}
         </div>
 
-        <MessageInput onSend={sendMessage} />
+        <MessageInput onSend={sendMessage} isSendBlocked={isReplying} />
       </main>
     </div>
   );

@@ -8,12 +8,15 @@ const MAX_TEXTAREA_HEIGHT = 160;
 
 interface MessageInputProps {
   onSend: (text: string) => void;
+  // Verdadeiro enquanto o atendente responde. Dá para continuar digitando, mas o envio
+  // espera a resposta terminar, para o histórico mandado ao bot ficar na ordem certa.
+  isSendBlocked?: boolean;
 }
 
-export function MessageInput({ onSend }: MessageInputProps) {
+export function MessageInput({ onSend, isSendBlocked = false }: MessageInputProps) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const canSend = value.trim().length > 0;
+  const canSend = value.trim().length > 0 && !isSendBlocked;
 
   // O campo cresce conforme o texto, até MAX_TEXTAREA_HEIGHT.
   useLayoutEffect(() => {
@@ -25,7 +28,7 @@ export function MessageInput({ onSend }: MessageInputProps) {
 
   function submit() {
     const text = value.trim();
-    if (!text) return;
+    if (!text || isSendBlocked) return;
     onSend(text);
     setValue("");
   }
