@@ -2,7 +2,7 @@
 // Formato dos eventos: docs/timetrack-api.md, seção 8. Cada evento é uma linha
 // "data: {json}" terminada por uma linha em branco.
 
-import type { MessageRole } from "./types";
+import type { MessageRole, ToolUse } from "./types";
 
 export interface ChatHistoryItem {
   role: MessageRole;
@@ -12,6 +12,8 @@ export interface ChatHistoryItem {
 export interface ChatStreamHandlers {
   // Chamado a cada pedaço de texto da resposta, na ordem em que chegam.
   onText: (text: string) => void;
+  // Chamado quando o atendente terminou de usar uma ferramenta (evento "tool").
+  onTool: (tool: ToolUse) => void;
   // Mensagem amigável para mostrar na conversa. Chega no máximo uma vez.
   onError: (message: string) => void;
 }
@@ -61,6 +63,7 @@ export async function streamChatReply(
     for await (const event of readEvents(response.body)) {
       receivedAnything = true;
       if (event.type === "text") handlers.onText(event.text);
+      else if (event.type === "tool") handlers.onTool(event.tool);
       else if (event.type === "error") reportError(event.message);
     }
   } catch {
@@ -74,7 +77,10 @@ export async function streamChatReply(
 
 // Só os eventos que a tela usa. tool_start, tool_end, done e qualquer tipo novo
 // são ignorados sem quebrar a leitura.
-type ChatEvent = { type: "text"; text: string } | { type: "error"; message: string };
+type ChatEvent =
+  | { type: "text"; text: string }
+  | { type: "tool"; tool: ToolUse }
+  | { type: "error"; message: string };
 
 async function* readEvents(body: ReadableStream<Uint8Array>): AsyncGenerator<ChatEvent> {
   const reader = body.getReader();
@@ -120,6 +126,11 @@ function parseEventLine(line: string): ChatEvent | null {
   const record = data as Record<string, unknown>;
   if (record.type === "text" && typeof record.text === "string") {
     return { type: "text", text: record.text };
+  }
+  // Formato: {"type":"tool","nome":"consultar_usuario","ok":true}. "nome" vem em português
+  // porque é assim que o site de chamados envia.
+  if (record.type === "tool" && typeof record.nome === "string" && typeof record.ok === "boolean") {
+    return { type: "tool", tool: { name: record.nome, ok: record.ok } };
   }
   if (record.type === "error" && typeof record.message === "string") {
     return { type: "error", message: record.message };

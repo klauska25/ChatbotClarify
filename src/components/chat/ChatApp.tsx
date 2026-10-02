@@ -4,8 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNow } from "@/hooks/use-now";
 import { streamChatReply } from "@/lib/chat-stream";
 import { sampleConversations } from "@/lib/conversas-exemplo";
+import { loadConversations, saveConversations } from "@/lib/conversation-storage";
 import { createId } from "@/lib/ids";
-import type { Conversation, Message } from "@/lib/types";
+import type { Conversation, Message, ToolUse } from "@/lib/types";
 import { AmbientGlow } from "./AmbientGlow";
 import { ChatHeader } from "./ChatHeader";
 import { EmptyState } from "./EmptyState";
@@ -54,7 +55,21 @@ export function ChatApp() {
   const [replyingIds, setReplyingIds] = useState<ReadonlySet<string>>(new Set());
   // Respostas em andamento, para cancelar os pedidos se o componente sair da tela.
   const pendingReplies = useRef<Set<AbortController>>(new Set());
+  // Só depois de ler o localStorage é que as mudanças passam a ser salvas, senão as
+  // conversas padrão sobrescreveriam as salvas logo na abertura da página.
+  const [hasLoadedSaved, setHasLoadedSaved] = useState(false);
   const now = useNow();
+
+  // O localStorage só existe no navegador, por isso é lido depois da primeira renderização.
+  useEffect(() => {
+    const saved = loadConversations();
+    if (saved) setConversations(saved);
+    setHasLoadedSaved(true);
+  }, []);
+
+  useEffect(() => {
+    if (hasLoadedSaved) saveConversations(conversations);
+  }, [conversations, hasLoadedSaved]);
 
   useEffect(() => {
     const replies = pendingReplies.current;
@@ -110,6 +125,23 @@ export function ChatApp() {
     );
   }
 
+  // Registra uma ferramenta usada pelo atendente na mensagem de resposta.
+  function addToolToMessage(conversationId: string, messageId: string, tool: ToolUse) {
+    setConversations((previous) =>
+      previous.map((conversation) => {
+        if (conversation.id !== conversationId) return conversation;
+        return {
+          ...conversation,
+          messages: conversation.messages.map((message) =>
+            message.id === messageId
+              ? { ...message, tools: [...(message.tools ?? []), tool] }
+              : message,
+          ),
+        };
+      }),
+    );
+  }
+
   function setReplying(conversationId: string, replying: boolean) {
     setReplyingIds((previous) => {
       const next = new Set(previous);
@@ -125,41 +157,52 @@ export function ChatApp() {
 
     const userMessage: Message = { id: createId("msg"), role: "user", text, sentAt: Date.now() };
     // O histórico é montado aqui porque o estado só é atualizado depois deste render.
-    const history = [...activeConversation.messages, userMessage].map((message) => ({
-      role: message.role,
-      content: message.text,
-    }));
+    // Respostas só com selos (sem texto) ficam de fora: a API não aceita mensagem vazia.
+    const history = [...activeConversation.messages, userMessage]
+      .filter((message) => message.text !== "")
+      .map((message) => ({ role: message.role, content: message.text }));
 
     appendMessage(conversationId, userMessage);
     setReplying(conversationId, true);
 
     const controller = new AbortController();
     pendingReplies.current.add(controller);
-    // A bolha do atendente só aparece com o primeiro pedaço de texto. Até lá fica
-    // o indicador de digitando.
+    // A mensagem do atendente nasce com o primeiro evento (texto ou ferramenta). Se a
+    // primeira coisa for uma ferramenta, o selo aparece sozinho e o indicador de
+    // digitando continua até o texto chegar.
     let replyId: string | null = null;
+    let replyHasText = false;
 
-    function addToReply(chunk: string) {
+    function ensureReply(): string {
       if (replyId === null) {
         replyId = createId("msg");
         appendMessage(conversationId, {
           id: replyId,
           role: "assistant",
-          text: chunk,
+          text: "",
           sentAt: Date.now(),
         });
-        setReplying(conversationId, false);
-      } else {
-        appendToMessage(conversationId, replyId, chunk);
       }
+      return replyId;
+    }
+
+    function addToReply(chunk: string) {
+      appendToMessage(conversationId, ensureReply(), chunk);
+      replyHasText = true;
+      setReplying(conversationId, false);
+    }
+
+    function addToolToReply(tool: ToolUse) {
+      addToolToMessage(conversationId, ensureReply(), tool);
     }
 
     await streamChatReply(
       history,
       {
         onText: addToReply,
+        onTool: addToolToReply,
         // Se a resposta já começou, o aviso vai no fim dela em vez de numa bolha nova.
-        onError: (message) => addToReply(replyId === null ? message : `\n\n${message}`),
+        onError: (message) => addToReply(replyHasText ? `\n\n${message}` : message),
       },
       controller.signal,
     );

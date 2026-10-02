@@ -15,6 +15,8 @@ export interface Message {
   role: MessageRole;
   text: string;
   sentAt: number; // timestamp em milissegundos
+  // Só nas respostas do atendente que usaram ferramentas. Fica salvo junto com a mensagem.
+  tools?: ToolUse[];
 }
 
 export interface Conversation {
@@ -26,4 +28,11 @@ export interface Conversation {
   category?: Category;
   createdAt: number;
   messages: Message[];
+}
+
+// Ferramenta que o atendente usou ao montar uma resposta (evento "tool" do /api/chat).
+// name é o nome técnico da tool (ex.: "consultar_usuario"); o texto da tela sai de tool-labels.ts.
+export interface ToolUse {
+  name: string;
+  ok: boolean;
 }
