@@ -1,5 +1,6 @@
 import { formatClockTime } from "@/lib/time-format";
 import type { Message } from "@/lib/types";
+import { SpeakButton } from "./SpeakButton";
 import { ToolBadge } from "./ToolBadge";
 
 const ASSISTANT_NAME = "Atendente";
@@ -35,10 +36,13 @@ export function MessageBubble({ message, contactName, showTime }: MessageBubbleP
           {message.text}
         </div>
       )}
-      <p className="mt-1.5 px-1 font-mono text-[11px] text-muted">
-        {author}
-        {showTime && ` · ${formatClockTime(message.sentAt)}`}
-      </p>
+      <div className="mt-1.5 flex items-center gap-2 px-1 font-mono text-[11px] text-muted">
+        <p>
+          {author}
+          {showTime && ` · ${formatClockTime(message.sentAt)}`}
+        </p>
+        {!isUser && message.text !== "" && <SpeakButton text={message.text} />}
+      </div>
     </div>
   );
 }
