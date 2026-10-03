@@ -5,6 +5,7 @@ import { useNow } from "@/hooks/use-now";
 import { streamChatReply } from "@/lib/chat-stream";
 import { sampleConversations } from "@/lib/conversas-exemplo";
 import { loadConversations, saveConversations } from "@/lib/conversation-storage";
+import { findEmail, nameFromEmail } from "@/lib/contact-from-email";
 import { createId } from "@/lib/ids";
 import type { Conversation, Message, ToolUse } from "@/lib/types";
 import { AmbientGlow } from "./AmbientGlow";
@@ -42,6 +43,18 @@ function titleFromText(text: string): string {
   const singleLine = text.replace(/\s+/g, " ").trim();
   if (singleLine.length <= TITLE_MAX_LENGTH) return singleLine;
   return `${singleLine.slice(0, TITLE_MAX_LENGTH).trimEnd()}...`;
+}
+
+// Quando a pessoa informa o e-mail pela primeira vez, a conversa passa a ter o nome dela.
+// Só vale para o primeiro e-mail: se ela citar o e-mail de um colega depois, o nome não muda.
+function contactFromMessage(
+  conversation: Conversation,
+  message: Message,
+): Pick<Conversation, "contactName" | "contactEmail"> | null {
+  if (message.role !== "user" || conversation.contactEmail) return null;
+  const email = findEmail(message.text);
+  if (!email) return null;
+  return { contactEmail: email, contactName: nameFromEmail(email) };
 }
 
 export function ChatApp() {
@@ -103,6 +116,7 @@ export function ChatApp() {
           conversation.messages.length === 0 && message.role === "user";
         return {
           ...conversation,
+          ...contactFromMessage(conversation, message),
           title: isFirstUserMessage ? titleFromText(message.text) : conversation.title,
           messages: [...conversation.messages, message],
         };
