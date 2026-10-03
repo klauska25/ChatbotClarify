@@ -1,7 +1,8 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
-import { ArrowRightIcon } from "@/components/icons";
+import { ArrowRightIcon, MicIcon } from "@/components/icons";
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 
 // Altura máxima do campo antes de ele ganhar barra de rolagem.
 const MAX_TEXTAREA_HEIGHT = 160;
@@ -17,6 +18,23 @@ export function MessageInput({ onSend, isSendBlocked = false }: MessageInputProp
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const canSend = value.trim().length > 0 && !isSendBlocked;
+  // Texto que já estava no campo quando o ditado começou; o que for falado entra depois dele.
+  const textBeforeDictation = useRef("");
+  const dictation = useSpeechRecognition({
+    onTranscript: (transcript) => {
+      const separator = textBeforeDictation.current === "" ? "" : " ";
+      setValue(textBeforeDictation.current + separator + transcript);
+    },
+  });
+
+  function toggleDictation() {
+    if (dictation.isListening) {
+      dictation.stop();
+      return;
+    }
+    textBeforeDictation.current = value.trim();
+    dictation.start();
+  }
 
   // O campo cresce conforme o texto, até MAX_TEXTAREA_HEIGHT.
   useLayoutEffect(() => {
@@ -29,6 +47,8 @@ export function MessageInput({ onSend, isSendBlocked = false }: MessageInputProp
   function submit() {
     const text = value.trim();
     if (!text || isSendBlocked) return;
+    // Enviar no meio do ditado encerra o microfone, senão o resto da fala voltaria ao campo.
+    if (dictation.isListening) dictation.stop();
     onSend(text);
     setValue("");
   }
@@ -61,9 +81,25 @@ export function MessageInput({ onSend, isSendBlocked = false }: MessageInputProp
           value={value}
           onChange={(event) => setValue(event.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Escreva sua mensagem"
+          placeholder={dictation.isListening ? "Ouvindo, pode falar" : "Escreva sua mensagem"}
           className="neu-inset min-h-11 flex-1 resize-none rounded-2xl border border-transparent bg-neu px-4 py-2.5 text-base leading-6 text-fg outline-none transition-colors placeholder:text-muted focus:border-accent-line/60"
         />
+        {dictation.isSupported && (
+          <button
+            type="button"
+            onClick={toggleDictation}
+            aria-pressed={dictation.isListening}
+            aria-label={dictation.isListening ? "Parar ditado" : "Ditar mensagem por voz"}
+            title={dictation.isListening ? "Parar ditado" : "Ditar mensagem por voz"}
+            className={`flex size-11 shrink-0 items-center justify-center rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-line ${
+              dictation.isListening
+                ? "animate-pulse bg-red-600 text-white"
+                : "text-muted hover:bg-hover hover:text-fg"
+            }`}
+          >
+            <MicIcon />
+          </button>
+        )}
         <button
           type="submit"
           disabled={!canSend}
@@ -73,9 +109,16 @@ export function MessageInput({ onSend, isSendBlocked = false }: MessageInputProp
           <ArrowRightIcon />
         </button>
       </div>
-      <p className="mt-2 hidden px-2 text-xs text-muted md:block">
-        Enter envia. Shift+Enter quebra a linha.
-      </p>
+      {dictation.error ? (
+        <p role="alert" className="mt-2 px-2 text-xs text-red-600 dark:text-red-400">
+          {dictation.error}
+        </p>
+      ) : (
+        <p className="mt-2 hidden px-2 text-xs text-muted md:block">
+          Enter envia. Shift+Enter quebra a linha.
+          {dictation.isSupported && " Use o microfone para falar em vez de digitar."}
+        </p>
+      )}
     </form>
   );
 }
